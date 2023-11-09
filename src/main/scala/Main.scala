@@ -54,12 +54,39 @@ object Main {
           defaultFileName
       }
 
-      // Open the file for reading
-      val source = Source.fromFile(fileName)
+      println()
+      println(s"Triangle min path sum: $evaluateTriangle")
+      println()
+    }
+  }
 
-      //Test opening the doc and reading the rows
-      println(getRowAtIndex(0).get.mkString(" "))
+  /*
+    Evaluates triangle by using dynamic programming
+    It starts from the penultimate row and goes upwards, doing addition on of the lesser values
+    Returns the sum of the minimum path, which is located at the very top of the triangle
+  */
+  private def evaluateTriangle()(implicit fileName: String): Int = {
+    // Open the file for reading
+    val source = Source.fromFile(fileName)
+    try {
+      val triangleSize = source.getLines().size
 
+      // Initialize the last row of the DP table
+      val dp = Array.ofDim[Int](triangleSize, triangleSize)
+
+      dp(triangleSize - 1) = getRowAtIndex(triangleSize - 1).get
+      // Bottom-up calculation of DP table
+      for (i <- (triangleSize - 2) to 0 by -1) {
+        val currentRow = getRowAtIndex(i)
+        for (j <- 0 to i) {
+          // Add to the value of the current item, the one which is smaller from the connected nodes
+          dp(i)(j) = currentRow.get(j) + Math.min(dp(i + 1)(j), dp(i + 1)(j + 1))
+        }
+      }
+
+      dp(0)(0)
+    }
+    finally {
       // Close the file
       source.close
     }
