@@ -55,7 +55,7 @@ object Main {
       }
 
       println()
-      println(s"Triangle min path sum: $evaluateTriangle")
+      println(evaluateTriangle)
       println()
     }
   }
@@ -65,7 +65,7 @@ object Main {
     It starts from the penultimate row and goes upwards, doing addition on of the lesser values
     Returns the sum of the minimum path, which is located at the very top of the triangle
   */
-  private def evaluateTriangle()(implicit fileName: String): Int = {
+  private def evaluateTriangle()(implicit fileName: String): String = {
     // Open the file for reading
     val source = Source.fromFile(fileName)
     try {
@@ -83,13 +83,36 @@ object Main {
           dp(i)(j) = currentRow.get(j) + Math.min(dp(i + 1)(j), dp(i + 1)(j + 1))
         }
       }
-
-      dp(0)(0)
+      reconstructMinPath(triangleSize, dp) + " = " + dp(0)(0)
     }
     finally {
       // Close the file
       source.close
     }
+  }
+
+  /*
+    Reconstructs the minimum path by going from top to bottom, choosing the lesser value
+    and then using those indexes to find the original value from reading from the text document
+    Returns the path as a string with + delimiter
+  */
+  private def reconstructMinPath(triangleSize: Int, dp: Array[Array[Int]])(implicit fileName: String): String = {
+    var row = 0
+    var col = 0
+    val minimalPath = scala.collection.mutable.ListBuffer.empty[Int]
+
+    while (row < triangleSize - 1) {
+      minimalPath += getRowAtIndex(row).get(col)
+      if (dp(row + 1)(col) < dp(row + 1)(col + 1)) {
+        col = col
+      } else {
+        col = col + 1
+      }
+      row = row + 1
+    }
+
+    minimalPath += getRowAtIndex(triangleSize - 1).get(col)
+    minimalPath.toList.mkString(" + ")
   }
 
   /*
